@@ -152,7 +152,7 @@ public class TelegramScheduleBot extends TelegramLongPollingBot {
         }
 
         String[] reverceDate;
-        StringBuilder fullMessage = new StringBuilder().append("                                   ");
+        StringBuilder fullMessage = new StringBuilder();
 
         for (int i = 0; i < lessons.size(); i++) {
             LessonDto lessonDto = lessons.get(i);
@@ -168,7 +168,7 @@ public class TelegramScheduleBot extends TelegramLongPollingBot {
                                 lessonDto.getLecturer() + "\n\n");
             } else {
                 fullMessage.append(
-                        "                                   \uD83D\uDDD3" +
+                        "                             \uD83D\uDDD3" +
                                 lessonDto.getDayOfWeekString() + " " + date + "\uD83D\uDDD3\n" +
                                 "\uD83D\uDD58 " + lessonDto.getBeginLesson() + " - " + lessonDto.getEndLesson() + "\n   " +
                                 lessonDto.getDiscipline() + "\n   ⭐\uFE0F" +
