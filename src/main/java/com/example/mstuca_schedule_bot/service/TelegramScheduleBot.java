@@ -2,6 +2,8 @@ package com.example.mstuca_schedule_bot.service;
 
 import com.example.mstuca_schedule_bot.config.BotConfig;
 import com.example.mstuca_schedule_bot.dto.LessonDto;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -19,6 +21,8 @@ import java.util.List;
 
 @Component
 public class TelegramScheduleBot extends TelegramLongPollingBot {
+    private static final Logger log = LoggerFactory.getLogger(ScheduleApiClient.class);
+
     private final BotConfig botConfig;
     private final ScheduleService scheduleService;
 
@@ -35,6 +39,13 @@ public class TelegramScheduleBot extends TelegramLongPollingBot {
             String text = update.getMessage().getText();
             long chatId = update.getMessage().getChatId();
 
+            var user = update.getMessage().getFrom();
+            String username = user.getUserName() != null ? "@" + user.getUserName() : "без_ника";
+            String firstName = user.getFirstName();
+            Long userId = user.getId();
+
+            log.info("Пользователь {} (имя: {}, id: {}) написал: \"{}\"",
+                    username, firstName, userId, text);
             switch (text) {
                 case "/start":
                     sendMessage(chatId, "Добро пожаловать! Выберите нужную неделю:");
