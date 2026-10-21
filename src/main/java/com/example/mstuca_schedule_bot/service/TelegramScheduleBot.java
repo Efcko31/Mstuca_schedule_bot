@@ -25,12 +25,13 @@ public class TelegramScheduleBot extends TelegramLongPollingBot {
 
     private final BotConfig botConfig;
     private final ScheduleService scheduleService;
-    private RateLimiterService rateLimiter;
+    private final RateLimiterService rateLimiter;
 
-    public TelegramScheduleBot(BotConfig botConfig, ScheduleService scheduleService) {
+    public TelegramScheduleBot(BotConfig botConfig, ScheduleService scheduleService, RateLimiterService rateLimiter) {
         super(botConfig.getBotToken());
         this.botConfig = botConfig;
         this.scheduleService = scheduleService;
+        this.rateLimiter = rateLimiter;
     }
 
     @Override
@@ -47,11 +48,6 @@ public class TelegramScheduleBot extends TelegramLongPollingBot {
 
             if (!rateLimiter.isAllowed(userId)) {
                 log.warn("Пользователь {} слишком часто отправляет запросы (спам).", userId);
-                return;
-            }
-
-            if (!update.hasMessage() || !update.getMessage().hasText()) {
-                sendMessage(chatId, "Выберите вариант из приведенных \uD83E\uDD78");
                 return;
             }
 
