@@ -1,16 +1,21 @@
 package com.example.mstuca_schedule_bot.service;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
-@Slf4j
+
 @Component
-@RequiredArgsConstructor
+
 public class ScheduleInitializer {
-    private final ScheduleApiClient scheduleApiClient; // Замените на имя вашего сервиса, где лежит метод checkLessonsOnDataBase
+    private static final Logger log = LoggerFactory.getLogger(ScheduleApiClient.class);
+    private final ScheduleApiClient scheduleApiClient;
+
+    public ScheduleInitializer(ScheduleApiClient scheduleApiClient) {
+        this.scheduleApiClient = scheduleApiClient;
+    }
 
     @EventListener(ApplicationReadyEvent.class)
     public void initScheduleOnStartup() {
