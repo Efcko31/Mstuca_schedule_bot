@@ -25,6 +25,7 @@ public class TelegramScheduleBot extends TelegramLongPollingBot {
 
     private final BotConfig botConfig;
     private final ScheduleService scheduleService;
+    private RateLimiterService rateLimiter;
 
     public TelegramScheduleBot(BotConfig botConfig, ScheduleService scheduleService) {
         super(botConfig.getBotToken());
@@ -36,13 +37,30 @@ public class TelegramScheduleBot extends TelegramLongPollingBot {
     public void onUpdateReceived(Update update) {
 
         if (update.hasMessage() && update.getMessage().hasText()) {
-            String text = update.getMessage().getText();
+            String text = update.getMessage().getText().trim();
             long chatId = update.getMessage().getChatId();
 
             var user = update.getMessage().getFrom();
             String username = user.getUserName() != null ? "@" + user.getUserName() : "без_ника";
             String firstName = user.getFirstName();
             Long userId = user.getId();
+
+            if (!rateLimiter.isAllowed(userId)) {
+                log.warn("Пользователь {} слишком часто отправляет запросы (спам).", userId);
+                return;
+            }
+
+            if (!update.hasMessage() || !update.getMessage().hasText()) {
+                sendMessage(chatId, "Выберите вариант из приведенных \uD83E\uDD78");
+                return;
+            }
+
+            if (text.length() > 100) {
+                log.warn("Слишком длинное сообщение от пользователя {}: {} символов",
+                        update.getMessage().getFrom().getId(), text.length());
+                sendMessage(chatId, "Выберите вариант из приведенных \uD83E\uDD78");
+                return;
+            }
 
             log.info("Пользователь {} (имя: {}, id: {}) написал: \"{}\"",
                     username, firstName, userId, text);
@@ -56,6 +74,7 @@ public class TelegramScheduleBot extends TelegramLongPollingBot {
                         sendMessage(chatId, createMessageForDate(scheduleService.getCurrentOrNextWeek("current")));
                     } catch (Exception e) {
                         sendMessage(chatId, "Сайт с расписанием не отвечает :( Попробуйте позже.");
+                        log.error("Ошибка при запросе на текущую неделю: {}", e.getMessage());
                     }
                     break;
 
@@ -64,6 +83,7 @@ public class TelegramScheduleBot extends TelegramLongPollingBot {
                         sendMessage(chatId, createMessageForDate(scheduleService.getCurrentOrNextWeek("next")));
                     } catch (Exception e) {
                         sendMessage(chatId, "Сайт с расписанием не отвечает :( Попробуйте позже.");
+                        log.error("Ошибка при запросе на следующую неделю: {}", e.getMessage());
                     }
                     break;
                 case "На сегодня":
