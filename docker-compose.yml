@@ -1,0 +1,34 @@
+services:
+  postgres-db:
+    image: postgres:15-alpine
+    container_name: mstuca_schedule_bot
+    environment:
+      POSTGRES_DB: schedule_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d schedule_db" ]
+      interval: 5s      # Проверяем каждые 5 секунд
+      timeout: 3s       # Ждём ответа 3 секунды
+      retries: 5        # Пробуем 5 раз перед тем, как считать контейнер "больным"
+    ports:
+      - "5432:5432"     # Пробрасываем порт наружу на твой ПК
+
+  # 2. Сервис нашего Spring Boot приложения
+  schedule-bot:
+    build: .            # Собираем Dockerfile из текущей папки
+    container_name: schedule_bot_backend
+    ports:
+      - "8080:8080"     # Доступ к приложению по порту 8080
+    depends_on:
+      postgres-db:
+        condition: service_healthy   # Приложение не запустится, пока не поднимется база
+    env_file:
+      - .env
+    environment:
+      # Переопределяем настройки подключения к БД для Spring Boot
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-db:5432/schedule_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+      #SPRING_FLYWAY_USER: postgres
+      #SPRING_FLYWAY_PASSWORD: ${DB_PASSWORD}

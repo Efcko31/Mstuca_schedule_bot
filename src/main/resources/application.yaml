@@ -1,0 +1,22 @@
+bot:
+  name: mstuca_scheduleBot
+  token: ${BOT_TOKEN}
+  schedule:
+    cron: "0 0 23 * * *"
+
+spring:
+  datasource:
+    url: jdbc:postgresql://postgres-db:5432/schedule_db
+    username: postgres
+    password: ${DB_PASSWORD}
+    hikari:
+      connection-init-sql: "CREATE SCHEMA IF NOT EXISTS mstuca_schedule_bot_schema;"
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        hbm2ddl:
+          create-namespaces: true
+  application:
+    name: mstuca-schedule-bot

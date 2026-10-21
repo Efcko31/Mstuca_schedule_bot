@@ -1,0 +1,1 @@
+CREATE SCHEMA IF NOT EXISTS mstuca_schedule_bot_schema;
