@@ -19,6 +19,7 @@ services:
   schedule-bot:
     build: .            # Собираем Dockerfile из текущей папки
     container_name: schedule_bot_backend
+    restart: unless-stopped
     ports:
       - "8080:8080"     # Доступ к приложению по порту 8080
     depends_on:
